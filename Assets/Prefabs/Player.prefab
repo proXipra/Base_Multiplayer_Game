@@ -405,6 +405,7 @@ GameObject:
   - component: {fileID: 5283712505677930148}
   - component: {fileID: 3877956067082582758}
   - component: {fileID: 7903084967621772841}
+  - component: {fileID: -7754736699510762435}
   - component: {fileID: 4273912864438045208}
   - component: {fileID: -2959652070740232790}
   - component: {fileID: -4511612369442707841}
@@ -609,6 +610,19 @@ MonoBehaviour:
         byte0124: 0
         byte0125: 0
   _nameText: {fileID: 1693991269535066240}
+--- !u!114 &-7754736699510762435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8372753857751303625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf749e8bdd47c9e41809157048e4372f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &4273912864438045208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,6 +653,7 @@ MonoBehaviour:
   hitMask:
     serializedVersion: 2
     m_Bits: 64
+  _weaponDamage: 25
 --- !u!114 &-4511612369442707841
 MonoBehaviour:
   m_ObjectHideFlags: 0
