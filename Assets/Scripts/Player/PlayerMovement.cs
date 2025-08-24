@@ -48,8 +48,8 @@ public class PlayerMovement : NetworkBehaviour
         Vector2 moveInput = _playerInput.Player.Move.ReadValue<Vector2>();
         Vector2 lookInput = _playerInput.Player.Look.ReadValue<Vector2>();
 
-        Debug.Log($"Move input X:{moveInput.x}, Y:{moveInput.y}");
-        Debug.Log($"Look input X:{lookInput.x}, Y:{lookInput.y}");
+        //Debug.Log($"Move input X:{moveInput.x}, Y:{moveInput.y}");
+        //Debug.Log($"Look input X:{lookInput.x}, Y:{lookInput.y}");
 
         transform.Translate(new Vector3 (moveInput.x, 0,moveInput.y) * _speed * Time.deltaTime);
         transform.rotation *= Quaternion.Euler(0, lookInput.x, 0);
