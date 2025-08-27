@@ -2,7 +2,6 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 public class WeaponController : NetworkBehaviour
 {
@@ -11,6 +10,7 @@ public class WeaponController : NetworkBehaviour
 
     [SerializeField] private LayerMask hitMask;
     [SerializeField] private float _weaponDamage = 25f;
+    [SerializeField] private float _weaponRange = 10f;
     private const float RAY_OFFSET = 1.5f;
 
     private void Awake()
@@ -26,7 +26,7 @@ public class WeaponController : NetworkBehaviour
         if (!IsOwner) return;
         
         _playerInput.Enable();
-        _attackAction.performed += AttackPerformed;
+        _attackAction.performed += Fire;
     }
 
 
@@ -35,51 +35,29 @@ public class WeaponController : NetworkBehaviour
         if (!IsOwner) return;
 
         _playerInput.Disable();
-        _attackAction.performed -= AttackPerformed;
+        _attackAction.performed -= Fire;
     }
-
-
-
-
-    void AttackPerformed(InputAction.CallbackContext callbackContext)
+    void Fire(InputAction.CallbackContext callbackContext)
     {
-        AttackServerRpc();
+
+        Vector3 origin = new Vector3(transform.position.x, transform.position.y + RAY_OFFSET, transform.position.z);
+        Vector3 direction = transform.forward;
+        FireServerRpc(origin, direction);
     }
 
     [ServerRpc]
-    void AttackServerRpc()
+    void FireServerRpc(Vector3 origin, Vector3 dir)
     {
-        RaycastHit hitInfo;
-        Vector3 origin = new Vector3(transform.position.x, transform.position.y + RAY_OFFSET, transform.position.z);
-        //Vector3 forward = transform.TransformDirection(Vector3.forward) * 10;
+        Debug.DrawRay(origin, dir * 10, Color.red, 20f);
 
-        Debug.DrawRay(origin, transform.forward * 10, Color.red, 20f);
-
-        if (Physics.Raycast(origin, transform.forward, out hitInfo, 10f, hitMask))
+        if (Physics.Raycast(origin, dir, out RaycastHit hitInfo, _weaponRange, hitMask))
         {
             if (hitInfo.collider.GetComponentInParent<HealthComponent>() is HealthComponent healthComp)
             {
-                healthComp.ApplyDamageServerRpc(_weaponDamage, OwnerClientId);
+                healthComp.ApplyDamage(_weaponDamage, OwnerClientId);
             }
-        
-            else
-            {
-                LogClientRpc();
-            }
+
         }
     }
 
-    [ClientRpc]
-    void LogClientRpc()
-    {
-        Debug.Log("Hit happend but lack of component");
-    }
-
-    //[ClientRpc]
-    //private void HitClientRpc(Transform transform)
-    //{
-    //    Debug.LogWarning("Hit");
-
-    //    transform.GetComponent<HealthComponent>().ApplyDamageServerRpc(_weaponDamage, OwnerClientId);
-    //}
 }

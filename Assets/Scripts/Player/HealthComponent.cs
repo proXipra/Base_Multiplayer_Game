@@ -5,9 +5,9 @@ public class HealthComponent : NetworkBehaviour
 {
     public NetworkVariable<float> health = new(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    [ServerRpc (RequireOwnership = false)]
-    public void ApplyDamageServerRpc(float damage, ulong attackerId)
+    public void ApplyDamage(float damage, ulong attackerId)
     {
+
         health.Value -= damage;
         LogDamageClientRpc(damage);
 
@@ -17,6 +17,8 @@ public class HealthComponent : NetworkBehaviour
             return;
         }
     }
+
+    
 
     [ClientRpc]
     void LogDamageClientRpc(float damage)
