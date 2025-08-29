@@ -1,14 +1,14 @@
+using System;
 using Unity.Collections;
 using Unity.Netcode;
 
-public struct PlayerStats : INetworkSerializable
+
+public struct PlayerStats : INetworkSerializable, IEquatable<PlayerStats>
 {
     public int Kills;
     public int Deaths;
     public FixedString128Bytes displayName;
     public ulong clientID;
-
-
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
@@ -17,5 +17,23 @@ public struct PlayerStats : INetworkSerializable
         serializer.SerializeValue(ref Deaths);
         serializer.SerializeValue(ref displayName);
         serializer.SerializeValue(ref clientID);
+    }
+
+    public bool Equals(PlayerStats other)
+    {
+        return Kills == other.Kills &&
+               Deaths == other.Deaths &&
+               displayName.Equals(other.displayName) &&
+               clientID == other.clientID;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is PlayerStats other && Equals((other));
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Kills, Deaths, displayName, clientID);  
     }
 }

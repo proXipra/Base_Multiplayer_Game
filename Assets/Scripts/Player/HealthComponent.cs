@@ -13,12 +13,17 @@ public class HealthComponent : NetworkBehaviour
 
         if (health.Value <= 0)
         {
+            Die(attackerId, OwnerClientId);
             OnDeathClientRpc(attackerId, OwnerClientId);
             return;
         }
     }
 
-    
+    void Die(ulong killerId, ulong victimId)
+    {
+        ScoreboardService.Instance?.UptadeStats(killerId, victimId);
+        //RespawnCoroutine yazýlacak !!
+    }
 
     [ClientRpc]
     void LogDamageClientRpc(float damage)
