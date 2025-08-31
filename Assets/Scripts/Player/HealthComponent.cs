@@ -1,8 +1,10 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
 public class HealthComponent : NetworkBehaviour
 {
+    [SerializeField] private float _maxHealth = 100;
     public NetworkVariable<float> health = new(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     public void ApplyDamage(float damage, ulong attackerId)
@@ -21,9 +23,41 @@ public class HealthComponent : NetworkBehaviour
 
     void Die(ulong killerId, ulong victimId)
     {
-        ScoreboardService.Instance?.UptadeStats(killerId, victimId);
-        //RespawnCoroutine yazýlacak !!
+        ScoreboardService.Instance.OnPlayerKilled(killerId, victimId);
+        StartCoroutine(RespawnCoroutine());
     }
+
+    private IEnumerator RespawnCoroutine()
+    {
+        SetAliveClientRpc(false);
+        yield return  new WaitForSeconds(5f);
+        health.Value = 100;
+        SetAliveClientRpc(true);
+    }
+
+    [ClientRpc]
+    void SetAliveClientRpc(bool alive)
+    {
+        Renderer[] renderers =  GetComponentsInChildren<Renderer>();
+        foreach (var renderer in renderers) 
+        {
+            renderer.enabled = alive;
+        }
+        Debug.Log($"Renders disabled {OwnerClientId}");
+
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (var collider in colliders)
+        {
+            collider.enabled = alive;
+        }
+        Debug.Log($"Colliders disabled {OwnerClientId}");
+        PlayerMovement controller = GetComponent<PlayerMovement>();
+        if (controller) controller.enabled = alive;
+
+        WeaponController weaponController = GetComponent<WeaponController>();
+        if (weaponController) weaponController.enabled = alive;
+    }
+
 
     [ClientRpc]
     void LogDamageClientRpc(float damage)

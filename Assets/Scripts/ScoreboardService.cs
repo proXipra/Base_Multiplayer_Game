@@ -1,41 +1,53 @@
-using UnityEngine;
 using Unity.Netcode;
-using System.Collections.Generic;
-using Unity.Collections;
 
 public class ScoreboardService : NetworkBehaviour
 {
     public static ScoreboardService Instance { get; private set; }
 
-    public NetworkList<PlayerStats> PlayerStats = new(null, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkList<PlayerStats> PlayerStatsList = new(readPerm: NetworkVariableReadPermission.Everyone, writePerm: NetworkVariableWritePermission.Server);
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
-            return; 
+            return;
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        //PlayerStats = new NetworkList<PlayerStats>(Allocator.Persistent);
     }
 
-    public void UptadeStats(ulong kilerId, ulong victimId)
+    public void RegisterPlayer(ulong playerId, string playerName)
     {
-        for (int i = 0; i < PlayerStats.Count; i++)
+        foreach (var player in PlayerStatsList)
         {
-            var stats = PlayerStats[i];
-            if (PlayerStats[i].clientID == kilerId)
+            if (player.clientID == playerId) return;
+        }
+
+        var stats = new PlayerStats
+        {
+            Kills = 0,
+            Deaths = 0,
+            clientID = playerId,
+            displayName = playerName
+        };
+        PlayerStatsList.Add(stats);
+    }
+
+    public void OnPlayerKilled(ulong kilerId, ulong victimId)
+    {
+        for (int i = 0; i < PlayerStatsList.Count; i++)
+        {
+            var stats = PlayerStatsList[i];
+            if (PlayerStatsList[i].clientID == kilerId)
             {
                 stats.Kills += 1;
-                PlayerStats[i] = stats;
+                PlayerStatsList[i] = stats;
             }
-            else if (PlayerStats[i].clientID == victimId)
+            else if (PlayerStatsList[i].clientID == victimId)
             {
                 stats.Deaths += 1;
-                PlayerStats[i] = stats;
+                PlayerStatsList[i] = stats;
             }
         }
     }

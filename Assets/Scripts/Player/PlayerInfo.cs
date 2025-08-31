@@ -1,4 +1,3 @@
-using System;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -13,6 +12,8 @@ public class PlayerInfo : NetworkBehaviour
         if (IsOwner)
         {
             playerName.Value = new FixedString128Bytes(GameSession.Instance.PlayerNick);
+
+            RequestRegisterOnServerRpc(OwnerClientId, playerName.Value.ToString());
         }
 
         _nameText.text = playerName.Value.ToString();
@@ -33,5 +34,12 @@ public class PlayerInfo : NetworkBehaviour
     private void OnNameChanged(FixedString128Bytes previousValue, FixedString128Bytes newValue)
     {
         _nameText.text = newValue.ToString();
+    }
+
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestRegisterOnServerRpc(ulong clientId, string playerName)
+    {
+        ScoreboardService.Instance.RegisterPlayer(clientId, playerName);
     }
 }
